@@ -1,0 +1,74 @@
+version: '3'
+
+services:
+  app:
+    hostname: tombstone_app
+    container_name: tombstone_app
+    build:
+      args:
+        user: huzaifa
+        uid: 1000
+      context: ./
+      dockerfile: Dockerfile
+    working_dir: /var/www/
+    volumes:
+      - ./:/var/www
+      - ./docker-compose/php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:rw,delegated
+    networks:
+      - tombstone
+    ports:
+      - 9000
+
+  db:
+    hostname: tombstone_db
+    container_name: tombstone_db
+    image: mariadb
+    volumes:
+      - db:/var/lib/mysql
+      # If you want to persist data on the host, comment the line above this one...
+      # and uncomment the line under this one.
+      # - ./docker-compose/db/data:/var/lib/mysql:rw,delegated
+    environment:
+      MYSQL_USER: tombstone
+      MYSQL_PASSWORD: tombstone
+      MYSQL_DATABASE: tombstone
+      MYSQL_ROOT_PASSWORD: tombstone
+    ports:
+      - '3306'
+    networks:
+      - tombstone
+
+  nginx:
+    hostname: tombstone_nginx
+    container_name: tombstone_nginx
+    image: nginx:1.17-alpine
+    ports:
+      - 80
+    volumes:
+      - ./:/var/www
+      - ./docker-compose/nginx:/etc/nginx/conf.d/
+    networks:
+      - tombstone
+
+  phpmyadmin:
+    hostname: tombstone_pma
+    container_name: tombstone_pma
+    image: phpmyadmin/phpmyadmin
+    environment:
+      MYSQL_ROOT_PASSWORD: 'tombstone'
+      PMA_HOST: tombstone_db
+      UPLOAD_LIMIT: 1G
+      PMA_PORT : 3306
+    ports:
+     - 80
+    volumes:
+     - /sessions
+    networks:
+      - tombstone
+
+volumes:
+  db:
+
+networks:
+  tombstone:
+    driver: bridge
