@@ -15,3 +15,11 @@ docker exec tombstone_app php artisan db:seed
 docker exec tombstone_app php artisan test
 
 ```
+
+## Sqlite Setup ( Optional )
+
+```env
+DB_CONNECTION=sqlite
+DB_HOST=127.0.0.1
+DB_PORT=3306
+```
